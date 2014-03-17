@@ -6,8 +6,7 @@ public class Alarm {
 	private final DateTime time;
 	private String label;
 	private final Appointment appointment;
-	private final int offset
-	private String hanna = "Hanna";
+	private final int offset;
 
 	public Alarm(String label, Appointment appointment,int offset) {
 		this.appointment=appointment;
