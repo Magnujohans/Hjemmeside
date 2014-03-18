@@ -38,6 +38,7 @@ public class MainLogic{
 	 * - Dersom noe ugyldig lastes inn fra databasen (exceptions ved opprettelse av objektet), slett det fra databasen.
 	 */
 	public static Employee currentUser;
+	public boolean loggedIn;
 	private DBAlarms dbalarms;
 	private DBAppointments dbapps;
 	private DBEmployees dbemps;
@@ -47,6 +48,7 @@ public class MainLogic{
 	//Hjelpemetode for å hente ut employee fra gitt streng	
 	public MainLogic(){
 		currentUser = null;
+		loggedIn = false;
 		dbalarms = new DBAlarms();
 		dbapps = new DBAppointments();
 		dbemps = new DBEmployees();

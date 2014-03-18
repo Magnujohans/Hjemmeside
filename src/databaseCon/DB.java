@@ -10,11 +10,11 @@ import java.util.ArrayList;
 public class DB {
 	Connection con;
 	
-	public DB(){
-		this.con = this.Connect();
-	}
+	//public DB(){
+		//this.con = this.Connect();
+	//}
 
-	public Connection Connect() {
+	public static void main(String[] args) {
 		Connection conn  =  null;
 		try {
 		  Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -31,7 +31,12 @@ public class DB {
 			  System.out.println("Noe gikk galt");
 		  }
 			finally {
-		      return conn;
+				try {
+			      if (conn !=  null) conn.close();
+			    } catch (SQLException ex) {
+			      System.out.println("Epic fail: "+ex.getMessage());
+			    }
+			  
 	}
 
 }
