@@ -15,9 +15,12 @@ public class Main {
 		System.out.println("Skriv inn ditt brukernavn");
 		brukernavn = input.next();
 		System.out.println("Skriv inn ditt passord");
-		
-		
+		passord = input.next();
+		if (main.loggedIn == true){
+			System.out.println("Logget inn");
+		}
 	}
+	
 
 	}
 

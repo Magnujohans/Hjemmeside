@@ -1,6 +1,7 @@
 package appLogic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import org.joda.time.DateTime;
@@ -10,6 +11,7 @@ import dbConnection.DBAppointments;
 import dbConnection.DBEmployees;
 import dbConnection.DBGroups;
 import dbConnection.DBRooms;
+import dbConnection.Simpleconnect;
 
 import exceptions.BusyUserException;
 import exceptions.DateTimeException;
@@ -39,6 +41,7 @@ public class MainLogic{
 	 */
 	public static Employee currentUser;
 	public boolean loggedIn;
+	private Simpleconnect mc;
 	private DBAlarms dbalarms;
 	private DBAppointments dbapps;
 	private DBEmployees dbemps;
@@ -172,6 +175,12 @@ public class MainLogic{
 	public void deleteAlarm(Alarm a){
 		currentUser.removeAlarm(a);
 		dbalarms.deleteAlarm(currentUser.getId(),a.getAppointment().getId(),a.getOffset());
+	}
+	public void LogIn(String username, String password){
+		ArrayList<HashMap<String,String>> resultat = mc.get(("select * from person where brukernavn= \"")+ username +("\"") + ("and passord =")+ ("\"") + password +("\"") );
+		if (!resultat.isEmpty()){
+			loggedIn = true;
+		}
 	}
 	
 	public static void main(String[] args) {

@@ -56,11 +56,23 @@ public class Person {
 		Avtale avtale = new Avtale (starttid, slutttid, beskrivelse, brukernavn);
 	}
 	
-	public void endreAvtale(){
+	public void endreAvtale(){ //utnytt gamle metoder
 		
 	}
 	
 	public void visVarsler(){
+		
+	}
+	public void visNyeVarsler(){
+		System.out.println("Viser nye avtaler for " + brukernavn);
+		String statement = ("select starttid, sluttid, sted, beskrivelse,rom " +
+		"from avtale, deltar " +
+		"where deltar.avtaleID=avtale.avtaleID and deltar.brukernavn=" + ("\"") + brukernavn + ("\"") + "and status =" + 0 );
+		ArrayList<HashMap<String,String>> avtaler = conn.get(statement);
+		for(HashMap<String,String> avtale : avtaler){
+			System.out.println(avtale.toString());
+		}
+	}
 		
 	}
 	

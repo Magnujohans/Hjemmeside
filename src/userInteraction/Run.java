@@ -48,11 +48,11 @@ public class Run {
 			System.out.println(": ");
 			int valg = in.nextInt();
 			switch(valg){
-			case 1: bruker.visKalender(); break;
-			case 2: bruker.opprettAvtale(); break;
-			case 3: bruker.endreAvtale(); break;
-			case 4: bruker.visVarsler(); break;
-			case 5: bruker.endreDeltakerStatus(); break;
+			case 1: bruker.visKalender(); break; //ferdig 
+			case 2: bruker.opprettAvtale(); break; //tja
+			case 3: bruker.endreAvtale(); break; //ikke
+			case 4: bruker.visVarsler(); break; //ikke
+			case 5: bruker.endreDeltakerStatus(); break; //ikke
 			case 6: gruppeMeny(); break; 
 			case 7: loggUt(); break;
 			}
@@ -74,7 +74,7 @@ public class Run {
 	private static void loggUt() {
 		logged_in=false;
 		System.out.println("Du er nå logget ut");
-		System.out.println("Trykk 1 for å logge inn");
+		System.out.println("Trykk 1 for å logge inn"); //shortcut...
 		int valg=in.nextInt();
 		if (valg==1) loggIn();
 	}
