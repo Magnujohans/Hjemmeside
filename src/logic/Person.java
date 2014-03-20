@@ -85,6 +85,30 @@ public class Person {
 		}
 	}
 	
+	
+	public void visAlarmer(){
+		ArrayList<Varsel> varsler = new ArrayList<Varsel>();
+		
+		String Statement = (String.format("SELECT * FROM Varsel WHERE brukernavn=%s AND sett =%s and tid >= cast((now()) as date)", brukernavn, 0));
+		ArrayList<HashMap<String,String>> posts = conn.get(Statement);
+		for(HashMap<String,String> post : posts){
+			String beskrivelse = post.get("melding");
+			String tidspunkt = post.get("tid");
+			int avtaleid = Integer.parseInt(post.get("avtaleID"));
+			int varselid = Integer.parseInt(post.get("varselID"));
+			int sett = Integer.parseInt(post.get("sett"));
+			varsler.add(new Varsel(varselid,avtaleid, sett, tidspunkt, beskrivelse, brukernavn));
+		}
+		for(Varsel varsel: varsler){
+			System.out.println("ALARM!!!");
+			System.out.println(varsel);
+			varsel.alarmenErSett(varsel.getVarselID());			
+		}
+		
+		
+	}
+	
+	
 	public void visNyeVarsler(){ //Hvem ble du invitert av vises som eier, skj¿nner ikke hvorfor
 		String statement = ("select starttid, sluttid, sted, beskrivelse,rom, eier AS \"invitert av\" " +
 		"from avtale, deltar " +

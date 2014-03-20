@@ -5,25 +5,35 @@ import java.util.Scanner;
 import connect.MultipleConnect;
 
 public class Varsel {
-	
-	int avtaleID;
+	int varselid;
+	int avtaleid;
 	String brukernavn;
 	String melding;
-	int type;
+	int sett;
 	String tid;
 	MultipleConnect conn;
 	static Scanner in = new Scanner(System.in);
 	
-	public Varsel(int avtaleID, String starttid, int type, String melding, String brukernavn){
+	
+	public Varsel(int varselID, int avtaleID,int sett, String starttid, String melding, String brukernavn){
 		conn = new MultipleConnect();
-		String statementAvtale = "insert into varsel(avtaleID, type, tid, melding, brukernavn) values " 
-				+ "("+  ("\"")+ avtaleID + ("\",") + ("\"")+ type
-				+ ("\",") +("\"")+ starttid + ("\",")+ ("\"")+ melding + ("\",") + ("\"") + brukernavn + ("\")");
-		System.out.println(statementAvtale);
-		conn.send(statementAvtale);
+		this.varselid = varselID;
+		this.avtaleid = avtaleID;
+		this.sett = sett;
+		this.tid = starttid;
+		this.melding = melding;
+		this.brukernavn = brukernavn;
+		
 	}
 
-	public static void main(String[] args) {
-		Varsel varsel = new Varsel(36, "2017-03-03 14:45:00", 1,  "hallo på do", "perarne");
+	
+	public void alarmenErSett(int varselid){
+		String statement= (String.format("UPDATE varsel SET sett=%s WHERE varselID=%s", 1, varselid));
+		System.out.println(statement);
+		conn.send(statement);
 	}
+	public int getVarselID(){
+		return varselid;
+	}
+	
 }

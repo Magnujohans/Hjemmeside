@@ -37,7 +37,7 @@ public class Rom {
 			if (isLedig(romIdInt)) ledig.add(romIdInt);
 		}
 		for (int romnummer:ledig){
-			if (!isRiktigSt¿rrelse(romnummer)) ledig.remove(romnummer);
+			if (!isRiktigStørrelse(romnummer)) ledig.remove(romnummer);
 		}
 		System.out.println(ledig);
 	}
@@ -83,10 +83,10 @@ public class Rom {
 		return (tid1-tid2)>0;
 	}
 	
-	public boolean isRiktigSt¿rrelse(int romID){
-		String hentSt¿rrelse = "select st¿rrelse from rom where romID=" + romID;
-		int st¿rrelse = Integer.parseInt(conn.get(hentSt¿rrelse).get(0).get("st¿rrelse"));
-		return (st¿rrelse>=antallDeltakere);
+	public boolean isRiktigStørrelse(int romID){
+		String hentStørrelse = "select st¿rrelse from rom where romID=" + romID;
+		int størrelse = Integer.parseInt(conn.get(hentStørrelse).get(0).get("størrelse"));
+		return (størrelse>=antallDeltakere);
 	}
 
 }
