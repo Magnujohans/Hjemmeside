@@ -29,37 +29,43 @@ public class Run {
 			if (!resultat.isEmpty()){
 				logged_in=true;
 				bruker = new Person(brukernavn);
-				System.out.println("logget inn");
+				System.out.println("Logget inn");
 			}
-			else System.out.println("feil brukernavn og/eller passord \n \n \n");
+			else System.out.println("feil brukernavn og/eller passord \n \n");
 		}
 		run();
 	}
 
-	private static void run() { //legg til mulighet for å lage gruppe
+	private static void run() {
+		System.out.println("Velkommen!");
+		bruker.visNyeVarsler();
 		while (logged_in){
-			System.out.print("\n \n \nTrykk 1 for å vise kalender, ");
+			bruker.VarsleEndringer();
+			System.out.print("\nTrykk 1 for å vise kalender, ");
 			System.out.print("Trykk 2 for å opprette avtale, ");
-			System.out.println("Trykk 3 for å endre avtale, ");
+			System.out.println("Trykk 3 for å endre og administrere avtale, ");
 			System.out.print("Trykk 4 for å vise nye varsler, ");
-			System.out.print("Trykk 5 for å endre deltakerstatus, ");
-			System.out.print("Trykk 6 for gruppemeny, ");
-			System.out.println("Trykk 7 for å logge ut: ");
+			System.out.print("Trykk 5 for å endre din deltakerstatus, ");
+			System.out.println("Trykk 6 for å se hvem som skal delta i en avtale");
+			System.out.print("Trykk 7 for gruppemeny, ");
+			System.out.println("Trykk 8 for å logge ut: ");
 			System.out.println(": ");
+			in.nextLine();
 			int valg = in.nextInt();
 			switch(valg){
-			case 1: bruker.visKalender(); break; //ferdig 
-			case 2: bruker.opprettAvtale(); break; //tja
-			case 3: bruker.endreAvtale(); break; //ikke
-			case 4: bruker.visVarsler(); break; //ikke
-			case 5: bruker.endreDeltakerStatus(); break; //ikke
-			case 6: gruppeMeny(); break; 
-			case 7: loggUt(); break;
+			case 1: bruker.visKalender(); break;
+			case 2: bruker.opprettAvtale(); break;
+			case 3: bruker.endreAvtale(); break;
+			case 4: bruker.visNyeVarsler(); break;
+			case 5: bruker.endreDeltakerstatus(); break;
+			case 6: bruker.visDeltakere(); break;
+			case 7: gruppemeny(); break; 
+			case 8: loggUt(); break;
 			}
 		}
 	}
 
-	private static void gruppeMeny() {
+	private static void gruppemeny() {
 		System.out.print("\n \n \nTrykk 1 for å opprette gruppe, ");
 		System.out.print("Trykk 2 for å endre gruppe, ");
 		System.out.println("Trykk 3 for å vise mine grupper, ");
@@ -74,7 +80,7 @@ public class Run {
 	private static void loggUt() {
 		logged_in=false;
 		System.out.println("Du er nå logget ut");
-		System.out.println("Trykk 1 for å logge inn"); //shortcut...
+		System.out.println("Trykk 1 for å logge inn");
 		int valg=in.nextInt();
 		if (valg==1) loggIn();
 	}

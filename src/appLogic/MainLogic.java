@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import dbConnection.DBAlarms;
 import dbConnection.DBAppointments;
@@ -47,6 +49,12 @@ public class MainLogic{
 	private DBEmployees dbemps;
 	private DBGroups dbgroups;
 	private DBRooms dbrooms;
+	public ArrayList<Alarm> alarms;
+	public ArrayList<Group> groups;
+	public ArrayList<Room> rooms;
+	public ArrayList<Appointment> appointments;
+	public ArrayList<Employee> employees;
+	
 
 	//Hjelpemetode for å hente ut employee fra gitt streng	
 	public MainLogic(){
@@ -57,19 +65,27 @@ public class MainLogic{
 		dbemps = new DBEmployees();
 		dbgroups = new DBGroups();
 		dbrooms = new DBRooms();
+		mc = new Simpleconnect();
+		employees = new ArrayList<Employee>();
+		appointments = new ArrayList<Appointment>();
+		groups = new ArrayList<Group>();
+		alarms = new ArrayList<Alarm>();
+		rooms = new ArrayList<Room>();
 		loadDatabase(); 
 	}
 
 	private void loadDatabase(){
-		dbemps.loadEmployees();
-		dbgroups.loadGroups();
-		dbrooms.loadRooms();
-		dbapps.loadAppointments();
+		employees = dbemps.loadEmployees();
+		groups = dbgroups.loadGroups();
+		rooms = dbrooms.loadRooms();
+		appointments = dbapps.loadAppointments();
 		dbalarms.loadAlarms();
+		
 	}
 
 	public void logInEmployee(Employee e){
 		currentUser = e;
+		
 	}
 
 	private ArrayList<User> participantsAsEmployees(ArrayList<User> participants){
@@ -110,18 +126,52 @@ public class MainLogic{
 		}	
 	}
 
-	public void createAppointment(String description, Room room, ArrayList<User> participants, DateTime start, DateTime end, Employee leader){
+	public void createAppointment(){
+		boolean ferdig = false;
+		Scanner sc = new Scanner(System.in);
+		DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+		
+		ArrayList<User> ansavtale = new ArrayList<User>();
+		Room rommet = null;
+		for(Employee emp: employees){
+			System.out.println(emp);
+		}
+		while(ferdig == false){
+			System.out.println("Legg til ny person i avtale");
+			int pers = sc.nextInt();
+			if (pers == -1){
+				ferdig = true;
+			}
+			else{				
+				ansavtale.add(employees.get(pers));
+			}
+		}
+		ferdig = false;
+		for(Room rom: rooms){
+			System.out.println(rom);
+		}
+		System.out.println("Legg til et rom");
+		int romindex = sc.nextInt();
+		rommet = rooms.get(romindex);
+		System.out.println("Sett starttidspunkt");
+		sc.nextLine();
+		DateTime starttiden= formatter.parseDateTime(sc.nextLine());
+		System.out.println("Sett slutttidspunkt");
+		DateTime slutttiden= formatter.parseDateTime(sc.nextLine());
+		System.out.println("Lag en beskrivelse");
+		String beskrivelse= sc.nextLine();
 		try {
-			ArrayList<User> employees = participantsAsEmployees(participants);
-			Appointment a = new Appointment(description, room, leader, employees, start, end);
+			
+			ArrayList<User> employees = participantsAsEmployees(ansavtale);
+			Appointment a = new Appointment(beskrivelse, rommet, currentUser, employees, starttiden, slutttiden);
 			dbapps.createAppiontment(a);
-			int appId = dbapps.getAppointmentId(leader, start);
+			int appId = dbapps.getAppointmentId(currentUser, starttiden);
 			a.setId(appId);	
 			for(User u : employees){
 				addParticipant(a, u);
 			}
-			room.appointmentCreated(a);
-			dbrooms.createRoomBooking(appId, room.getId());
+			rommet.appointmentCreated(a);
+			dbrooms.createRoomBooking(appId, rommet.getId());
 			System.out.println("Avtale opprettet!");
 		} catch (DateTimeException e) {
 			System.out.println("Ugyldig tidsrom");
@@ -131,7 +181,7 @@ public class MainLogic{
 			System.out.println("Rommet er ikke stort nok.");
 		} catch (BusyUserException e) {
 			System.out.println("Du er ikke ledig i dette tidsrommet.");
-		}	
+		}
 	}
 
 	private void addParticipant(Appointment a, User u){
@@ -177,7 +227,7 @@ public class MainLogic{
 		dbalarms.deleteAlarm(currentUser.getId(),a.getAppointment().getId(),a.getOffset());
 	}
 	public void LogIn(String username, String password){
-		ArrayList<HashMap<String,String>> resultat = mc.get(("select * from person where brukernavn= \"")+ username +("\"") + ("and passord =")+ ("\"") + password +("\"") );
+		ArrayList<HashMap<String,String>> resultat = mc.get(("select * from Person where Brukernavn= \"")+ username +("\"") + ("and Passord =")+ ("\"") + password +("\"") );
 		if (!resultat.isEmpty()){
 			loggedIn = true;
 		}

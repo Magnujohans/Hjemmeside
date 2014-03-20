@@ -37,7 +37,7 @@ public class MultipleConnect {
 				ResultSetMetaData rsmd = rs.getMetaData();
 
 				int noc = rsmd.getColumnCount();
-
+			
 				while (rs.next()) {	
 					HashMap<String,String> post = new HashMap<String, String>();
 					for (int i = 1; i <= noc; i++) {

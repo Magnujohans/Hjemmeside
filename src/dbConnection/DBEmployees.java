@@ -15,23 +15,25 @@ public class DBEmployees {
 		db = new Simpleconnect();
 	}
 
-	public void loadEmployees(){
-		ArrayList<HashMap<String,String>> posts = db.get("SELECT * FROM CalendarUser WHERE UType='Employee'");
+	public ArrayList<Employee> loadEmployees(){
+		ArrayList<HashMap<String,String>> posts = db.get("SELECT * FROM Person WHERE Brukertype='Ansatt'");
+		ArrayList<Employee> employees = new ArrayList<Employee>();
 		for(HashMap<String,String> post : posts){
-			int id = Integer.parseInt(post.get("UserID"));
-			String email = post.get("Email");
-			String name = post.get("UName");
+			int id = Integer.parseInt(post.get("BrukerID"));
+			String email = post.get("Epost");
+			String name = post.get("Brukernavn");
 			try {
-				new Employee(id, name, email);
+				employees.add(new Employee(id, name, email));
 			} catch (InvalidNameException e) {
 				deleteEmployee(id);
 			} catch (InvalidEmailException e) {
 				deleteEmployee(id);
 			}
 		}
+		return employees;
 	}
 
 	private void deleteEmployee(int id){
-		db.send(String.format("DELETE FROM CalendarUser WHERE UserID = %s", id));
+		db.send(String.format("DELETE FROM Person WHERE BrukerID = %s", id));
 	}
 }

@@ -16,19 +16,21 @@ public class DBRooms {
 	}
 
 	public void updateAppointmentRoom(int appId,String roomId){	
-		db.send(String.format("UPDATE Booking SET RoomID=%s WHERE AppID=%s",roomId,appId));	
+		db.send(String.format("UPDATE Reservasjon SET RomID=%s WHERE AvtaleID=%s",roomId,appId));	
 	}
 
 	public void createRoomBooking(int appId, String roomId){
-		db.send(String.format("INSERT INTO Booking VALUES ('%s','%s')",appId,roomId));
+		db.send(String.format("INSERT INTO Reservasjon VALUES ('%s','%s')",appId,roomId));
 	}
 
-	public void loadRooms(){
-		ArrayList<HashMap<String,String>> posts = db.get("SELECT * FROM Room ");
+	public ArrayList<Room> loadRooms(){
+		ArrayList<Room> rooms = new ArrayList<Room>();
+		ArrayList<HashMap<String,String>> posts = db.get("SELECT * FROM Rom ");
 		for(HashMap<String,String> post : posts){
-			String romid = (post.get("RoomID"));
-			int size = Integer.parseInt(post.get("Size"));
-			new Room(romid, size);
+			String romid = (post.get("RomID"));
+			int size = Integer.parseInt(post.get("Storrelse"));
+			rooms.add(new Room(romid, size));
 		}
+		return rooms;
 	}
 }

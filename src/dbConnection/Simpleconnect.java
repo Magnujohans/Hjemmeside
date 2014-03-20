@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class Simpleconnect {
-	String dbUrl = "jdbc:mysql://mysql.stud.ntnu.no/peterts_kalender";
+	String dbUrl = "jdbc:mysql://mysql.stud.ntnu.no/sebasbr_gruppe_50";
 	String dbClass = "com.mysql.jdbc.Driver";
-	String brukernavn="peterts_admin";
-	String passord="Gruppe16";
+	String brukernavn="sebasbr_database";
+	String passord= "heisann";
 	//her trenger man sitt eget passord
 
 

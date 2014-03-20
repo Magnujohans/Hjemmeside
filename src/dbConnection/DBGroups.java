@@ -15,14 +15,17 @@ public class DBGroups {
 		db = new Simpleconnect();
 	}
 
-	public void loadGroups(){
-		ArrayList<HashMap<String,String>> posts = db.get("SELECT * FROM CalendarUser WHERE UType='Group'");
+	public ArrayList<Group> loadGroups(){
+		ArrayList<Group> groups = new ArrayList<Group>();
+		ArrayList<HashMap<String,String>> posts = db.get("SELECT * FROM Person WHERE Brukertype='Group'");
 		for(HashMap<String,String> post : posts){
-			int id = Integer.parseInt(post.get("UserID"));
-			String email = post.get("Email");
-			String name = post.get("UName");
+			int id = Integer.parseInt(post.get("BrukerID"));
+			String email = post.get("Epost");
+			String name = post.get("Brukernavn");
 			try {
+				
 				Group g = new Group(id, name, email);
+				groups.add(g);
 				loadGroupMembers(g);
 			} catch (InvalidNameException e) {
 				deleteGroup(id);
@@ -30,20 +33,21 @@ public class DBGroups {
 				deleteGroup(id);
 			}
 		}
+		return groups;
 	}
 
 	private void loadGroupMembers(Group g){
 		int groupId = g.getId();
-		String query = String.format("SELECT (UserID) FROM CalendarUser, Groupmember WHERE UserID=EmpID AND GroupID=%s",groupId);
+		String query = String.format("SELECT (BrukerID) FROM Person, medlem_av WHERE BrukerID=EmpID AND GroupID=%s",groupId);
 		ArrayList<HashMap<String,String>> posts = db.get(query);
 		for(HashMap<String,String> post : posts){
-			int empId = Integer.parseInt(post.get("UserID"));
+			int empId = Integer.parseInt(post.get("BrukerID"));
 			Employee e = Employee.getEmployee(empId);
 			if(e != null) g.addMember(e);
 		}
 	}
 
 	private void deleteGroup(int id){
-		db.send(String.format("DELETE FROM CalendarUser WHERE UserID = %s", id));
+		db.send(String.format("DELETE FROM Person WHERE BrukerID = %s", id));
 	}
 }

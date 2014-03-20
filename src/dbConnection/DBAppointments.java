@@ -25,8 +25,8 @@ public class DBAppointments {
 	public int getAppointmentId(Employee leader, DateTime start){
 		int leaderId = leader.getId();
 		String startTime = dateTimeToString(start);
-		String sql = String.format(String.format("SELECT AppID FROM Appointment WHERE LeaderID='%s' AND StartTime='%s'",leaderId,startTime));
-		int appId = Integer.parseInt(db.get(sql).get(0).get("AppID"));
+		String sql = String.format(String.format("SELECT AvtaleID FROM Avtale WHERE OpprettetID='%s' AND StartTid='%s'",leaderId,startTime));
+		int appId = Integer.parseInt(db.get(sql).get(0).get("AvtaleID"));
 		return appId;
 	}
 
@@ -38,13 +38,13 @@ public class DBAppointments {
 	public void createParticipant(Appointment a, User u){
 		int aId = a.getId();
 		int uId = u.getId();
-		db.send(String.format("INSERT INTO AppInvitation VALUES ('%s', '%s', '2')",uId,aId));
+		db.send(String.format("INSERT INTO Invitasjon VALUES ('%s', '%s', '2')",uId,aId));
 	}
 
 	public void deleteParticipant(Appointment a, User u) {
 		int aId = a.getId();
 		int uId = u.getId();
-		db.send(String.format("DELETE FROM AppInvitation WHERE (AppID = '%s' AND UserID = '%s')", aId, uId));
+		db.send(String.format("DELETE FROM Invitasjon WHERE (AvtaleID = '%s' AND UserID = '%s')", aId, uId));
 	}
 
 	public void createAppiontment(Appointment a) {
@@ -54,7 +54,7 @@ public class DBAppointments {
 		String endTime = dateTimeToString(end);
 		String desc = a.getDescription();
 		int lId = a.getLeader().getId();
-		db.send(String.format("INSERT INTO Appointment (StartTime,EndTime,Description,LeaderID) VALUES ('%s', '%s','%s', '%s')",startTime, endTime, desc, lId));
+		db.send(String.format("INSERT INTO Avtale (StartTid,SluttTid,Avtalebeskrivelse,OpprettetID) VALUES ('%s', '%s','%s', '%s')",startTime, endTime, desc, lId));
 	}
 
 	public void updateUserStatus (boolean status, Appointment a, User u) {
@@ -63,27 +63,27 @@ public class DBAppointments {
 		String s = "2";
 		if(status==(Boolean)true) s = "1";
 		if(status==(Boolean)false) s = "0";
-		db.send(String.format("UPDATE AppInvitation SET Confirmed = %s WHERE (AppID = '%s' AND UserID = '%s')", s, aId, uId));
+		db.send(String.format("UPDATE Invitasjon SET AvtaleStatus = %s WHERE (AvtaleID = '%s' AND UserID = '%s')", s, aId, uId));
 	}
 
 	public void updateAppDesc(Appointment a, String desc) {
 		int aId = a.getId();
-		db.send(String.format("UPDATE Appointment SET Description = %s WHERE AppID = '%s'", desc, aId));
+		db.send(String.format("UPDATE Avtale SET Avtalebeskrivelse = %s WHERE AvtaleID = '%s'", desc, aId));
 	}
 
 	public void updateAppointmentStart(Appointment a, DateTime start) {
 		int aId = a.getId();
-		db.send(String.format("UPDATE Appointment SET StartTime = %s WHERE AppID = '%s'", start, aId));
+		db.send(String.format("UPDATE Avtale SET StartTid = %s WHERE AvtaleID = '%s'", start, aId));
 	}
 
 	public void updateAppointmentEnd(Appointment a, DateTime end) {
 		int aId = a.getId();
-		db.send(String.format("UPDATE Appointment SET EndTime = %s WHERE AppID = '%s'", end, aId));
+		db.send(String.format("UPDATE Avtale SET SluttTid = %s WHERE AvtaleID = '%s'", end, aId));
 	}
 
 	public void deleteAppointment(Appointment a) {
 		int aId = a.getId();
-		db.send(String.format("DELETE FROM Appointment WHERE AppID = '%s'", aId));
+		db.send(String.format("DELETE FROM Avtale WHERE AvtaleID = '%s'", aId));
 	}
 
 	private DateTime toDateTime(String datetime){
@@ -101,36 +101,38 @@ public class DBAppointments {
 	}
 
 	private ArrayList<User> loadAppParticipants(int appId){
-		String sql = String.format("SELECT * FROM AppInvitation WHERE AppID=%s",appId);
+		String sql = String.format("SELECT * FROM Invitasjon WHERE AvtaleID=%s",appId);
 		ArrayList<HashMap<String,String>> posts = db.get(sql);
 		ArrayList<User> participants = new ArrayList<User>();
 		for(HashMap<String,String> post : posts){
-			int userId = Integer.parseInt(post.get("UserID"));
-			sql = String.format("SELECT UType FROM CalendarUser WHERE UserID=%s",userId);
-			String type = db.get(sql).get(0).get("UType");
+			int userId = Integer.parseInt(post.get("BrukerID"));
+			sql = String.format("SELECT Brukertype FROM Person WHERE BrukerID=%s",userId);
+			String type = db.get(sql).get(0).get("Brukertype");
 
-			participants.add((type.equals("Employee") ? Employee.getEmployee(userId) : Group.getGroup(userId)));
+			participants.add((type.equals("Ansatt") ? Employee.getEmployee(userId) : Group.getGroup(userId)));
 		}
 		return participants;
 	}
 
 	private Room loadAppRoom(int appId){
-		String sql = String.format("SELECT RoomID FROM Booking WHERE AppID=%s",appId);
+		String sql = String.format("SELECT RomID FROM Reservasjon WHERE AvtaleID=%s",appId);
 		ArrayList<HashMap<String,String>> posts = db.get(sql);
-		String roomId = posts.get(0).get("RoomID");
+		String roomId = posts.get(0).get("RomID");
 		return Room.getRoom(roomId);
 	}
 
 
-	public void loadAppointments(){
-		String sql = "SELECT * FROM Appointment";
+	public ArrayList<Appointment> loadAppointments(){
+		String sql = "SELECT * FROM Avtale";
 		ArrayList<HashMap<String,String>> posts =db.get(sql);
+		ArrayList<Appointment> appointments = new ArrayList<Appointment>();
 		for(HashMap<String,String> post : posts){
-			int appId = Integer.parseInt(post.get("AppID"));
-			DateTime start = toDateTime(post.get("StartTime").substring(0,16));
-			DateTime end = toDateTime(post.get("EndTime").substring(0,16));
-			String description = post.get("Description");
-			int leaderId = Integer.parseInt(post.get("LeaderID"));
+			int appId = Integer.parseInt(post.get("AvtaleID"));
+			System.out.println(appId);
+			DateTime start = toDateTime(post.get("StartTid").substring(0,16));
+			DateTime end = toDateTime(post.get("SluttTid").substring(0,16));
+			String description = post.get("Avtalebeskrivelse");
+			int leaderId = Integer.parseInt(post.get("OpprettetID"));
 
 			Employee leader = Employee.getEmployee(leaderId);
 			Room room = loadAppRoom(appId);
@@ -140,6 +142,7 @@ public class DBAppointments {
 				Appointment a = new Appointment(appId, description, room, leader, participants, start, end);
 				room.getCalendar().addAppointment(start, end, a);
 				loadParticipantsStatus(a);
+				appointments.add(a);
 			} catch (DateTimeException e) {
 				deleteAppointment(appId);
 			} catch (RoomBookedException e) {
@@ -151,21 +154,22 @@ public class DBAppointments {
 			}
 		}
 		System.out.println("Appointments loaded.");
+		return appointments;
 	}
 
 	private void loadParticipantsStatus(Appointment a){
 		int appId = a.getId();
-		String sql = String.format("SELECT * FROM AppInvitation WHERE AppID=%s",appId);
+		String sql = String.format("SELECT * FROM Invitasjon WHERE AvtaleID=%s",appId);
 		ArrayList<HashMap<String,String>> posts =db.get(sql);
 		for(HashMap<String,String> post : posts){
-			int userId = Integer.parseInt(post.get("UserID"));
-			sql =String.format("SELECT UType FROM CalendarUser WHERE UserID=%s",userId);
-			String type = db.get(sql).get(0).get("UType");
+			int userId = Integer.parseInt(post.get("BrukerID"));
+			sql =String.format("SELECT Brukertype FROM Person WHERE BrukerID=%s",userId);
+			String type = db.get(sql).get(0).get("Brukertype");
 
-			User u = (type.equals("Employee") ? Employee.getEmployee(userId) : Group.getGroup(userId));
+			User u = (type.equals("Ansatt") ? Employee.getEmployee(userId) : Group.getGroup(userId));
 
-			if(post.get("Confirmed").equals("0")) u.declineAppointment(a);
-			else if(post.get("Confirmed").equals("1")){
+			if(post.get("Avtalestatus").equals("0")) u.declineAppointment(a);
+			else if(post.get("Avtalestatus").equals("1")){
 				try {
 					u.acceptAppointment(a);
 				} catch (BusyUserException e) {
@@ -178,6 +182,6 @@ public class DBAppointments {
 	}
 
 	private void deleteAppointment(int id){
-		db.send(String.format("DELETE FROM Appointment WHERE AppID = %s", id));
+		db.send(String.format("DELETE FROM Avtale WHERE AvtaleID = %s", id));
 	}
 }
