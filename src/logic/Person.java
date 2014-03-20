@@ -16,26 +16,25 @@ public class Person {
 		this.brukernavn=brukernavn;	
 	}
 	
-	public void visKalender() {
+	public void visKalender() { //ENDRET AV SEBASTIAN
 		String statement;
-		System.out.print("Velg 1 for Œ vise din egen kalender, trykk 2 for Œ vise kollegas kalender: ");
+		System.out.print("Velg 1 for Å’ vise din egen kalender, trykk 2 for Å’ vise kollegas kalender: ");
 		int valg = in.nextInt();
 		switch(valg){
 		case 1: System.out.println("Viser kalender for " + brukernavn + "\n\n");
-				String statementEgneAvtaler = "Select beskrivelse, sted, starttid, sluttid, rom from avtale where eier=" + ("\"") + brukernavn + ("\"")+ "and sluttid>= cast((now()) as date)";
-				ArrayList<HashMap<String,String>> egneAvtaler = conn.get(statementEgneAvtaler);
+		
+				String statementEgneAvtaler = "Select beskrivelse, sted, starttid, sluttid, rom from avtale where eier=" + ("\"") + brukernavn + ("\"")+ "and sluttid>= cast((now()) as date) ORDER BY starttid ASC";
+				
 				System.out.println("Avtaler opprettet av deg:\n");
-				for(HashMap<String,String> avtale : egneAvtaler){
-					System.out.println(avtale.toString());
-				}
+				toString1(statementEgneAvtaler);			
+				
 				String statementInvitert = "select starttid, sluttid, sted, beskrivelse,rom, status, eier as \"invitert av\" from avtale, deltar " +
 						"where sluttid>= cast((now()) as date) and deltar.avtaleID=avtale.avtaleID and deltar.brukernavn=" + ("\"") + brukernavn + ("\"") + "and not eier="+("\"") + brukernavn + ("\"")
-						+ "and not (skjul_i_kalender=1)";
-				ArrayList<HashMap<String,String>> andreAvtaler = conn.get(statementInvitert);
-				System.out.println("\nAndre avtaler:\n");
-				for(HashMap<String,String> avtale : andreAvtaler){
-					System.out.println(avtale.toString());
-				}
+						+ "and not (skjul_i_kalender=1) ORDER BY starttid ASC";
+				
+				System.out.println("\nAvtaler opprettet av andre:\n");
+				toString2(statementInvitert);
+				
 	
 				break;
 				
@@ -46,10 +45,7 @@ public class Person {
 				statement = ("select starttid, sluttid, sted, beskrivelse,rom, status, eier as \"invitert av\" " +
 						"from avtale, deltar " + "where sluttid>= cast((now()) as date) and deltar.avtaleID=avtale.avtaleID" +
 						" and deltar.brukernavn=" + ("\"") + kollega + ("\"") + "and not skjul_i_kalender=1");
-				ArrayList<HashMap<String,String>> kollegasavtaler = conn.get(statement);
-				for(HashMap<String,String> avtale : kollegasavtaler){
-					System.out.println(avtale.toString());
-				}
+				toString1(statement);
 				break;
 		default: System.out.println("feil input");
 				statement = "";
@@ -57,10 +53,139 @@ public class Person {
 		}
 	}
 
+
+	private void toString1(String statement) {
+		String langLinje = "_______________________________________________________________________________________________________________________________";
+		System.out.println(langLinje);
+		System.out.println("|  Starttid:              |  Slutt-tid:              |  Beskrivelse:                  |  Sted:                 |  Rom:        |");
+		System.out.println(langLinje);
+		
+		ArrayList<HashMap<String,String>> egneAvtaler = conn.get(statement);
+
+		for(HashMap<String,String> avtale : egneAvtaler){
+			
+			String starttid = avtale.get("starttid");
+			String sluttid = avtale.get("sluttid");
+			String beskrivelse = avtale.get("beskrivelse");
+			String sted = avtale.get("sted");
+			String rom = avtale.get("rom");
+			
+			String mellomrom = " ";
+			
+			if(sted==null){
+				sted = "         -   ";
+			}
+			int stedLengde = sted.length();
+			
+			if(rom==null){
+				rom = "    -   ";
+			}
+			int romLengde = rom.length();
+			
+			int differanseBeskrivelse = 30-beskrivelse.length();
+			int differanseSted = 20-stedLengde;
+			int differanseRom = 10-romLengde;
+			
+			
+			for(int i=0; i<differanseBeskrivelse; i++){
+				beskrivelse += mellomrom;
+			}
+			
+			for(int i=0; i<differanseSted; i++){
+				sted += mellomrom;
+			}
+			
+			for(int i=0; i<differanseRom; i++){
+				rom += mellomrom;
+			}
+			
+			System.out.println("|  " + starttid + "  |  " + sluttid + "   |  " + beskrivelse + "|  "+ sted + "  |  " +  rom + "  |");					
+		}
+		System.out.println(langLinje);
+		
+		
+		
+	}
+
+	private void toString2(String statementInvitert) {
+		String langLinje = "___________________________________________________________________________________________________________________________________________________________";
+		System.out.println(langLinje);
+		System.out.println("|  Starttid:              |  Slutt-tid:              |  Beskrivelse:                  |  Sted:                 |  Rom:        |  Invitert av: |  Status:  |");
+		System.out.println(langLinje);
+		
+		ArrayList<HashMap<String,String>> andreAvtaler = conn.get(statementInvitert);
+		for(HashMap<String,String> avtale : andreAvtaler){
+			
+			String starttid = avtale.get("starttid");
+			String sluttid = avtale.get("sluttid");
+			String beskrivelse = avtale.get("beskrivelse");
+			String sted = avtale.get("sted");
+			String rom = avtale.get("rom");
+			String eier = avtale.get("eier");
+			String status = avtale.get("status");
+			
+			String mellomrom = " ";
+
+			if(sted==null){
+				sted = "         -   ";
+			}
+			
+			if(rom==null){
+				rom = "    -   ";
+			}
+			
+			//0 ubesvart, 1 deltar, 2 avslÃ¥tt:
+			
+			
+			if(status.equals("0")){
+				status = "Ubesvart";
+			}
+			else if(status.equals("1")){
+				status = "Deltar";
+			}
+			else if(status.equals("2")){
+				status = "AvslÃ¥tt";
+			}
+
+			int stedLengde = sted.length();
+			int romLengde = rom.length();
+			int eierLengde = eier.length();
+			int statusLengde = status.length();
+			
+			int differanseBeskrivelse = 30-beskrivelse.length();
+			int differanseSted = 20-stedLengde;
+			int differanseRom = 10-romLengde;
+			int differanseEier = 11-eierLengde;
+			int differanseStatus = 9-statusLengde;
+			
+			for(int i=0; i<differanseBeskrivelse; i++){
+				beskrivelse += mellomrom;
+			}
+			for(int i=0; i<differanseSted; i++){
+				sted += mellomrom;
+			}
+			for(int i=0; i<differanseRom; i++){
+				rom += mellomrom;
+			}
+			for(int i=0; i<differanseEier; i++){
+				eier += mellomrom;
+			}
+			for(int i=0; i<differanseStatus; i++){
+				status += mellomrom;
+			}
+			
+			
+			System.out.println("|  " + starttid + "  |  " + sluttid + "   |  " + beskrivelse + "|  "+ sted + "  |   " +  rom + " |  " + eier + "  |  " + status + "|");					
+
+		}
+		System.out.println(langLinje + "\n");
+		
+		
+	}
 	//viser alle avtaler som ikke er i fortid for valgt person og som ikke er markert som skjult i kalender
 	public void visKalender2() {
 		String statement;
-		System.out.print("Velg 1 for Œ vise din egen kalender, trykk 2 for Œ vise kollegas kalender: ");
+		System.out.print("Velg 1 for Å’ vise din egen kalender, trykk 2 for Å’ vise kollegas kalender: ");
 		int valg = in.nextInt();
 		switch(valg){
 		case 1: System.out.println("Viser kalender for " + brukernavn + "\n\n\n");
@@ -85,40 +210,15 @@ public class Person {
 		}
 	}
 	
-	
-	public void visAlarmer(){
-		ArrayList<Varsel> varsler = new ArrayList<Varsel>();
-		
-		String Statement = (String.format("SELECT * FROM Varsel WHERE brukernavn=%s AND sett =%s and tid >= cast((now()) as date)", brukernavn, 0));
-		ArrayList<HashMap<String,String>> posts = conn.get(Statement);
-		for(HashMap<String,String> post : posts){
-			String beskrivelse = post.get("melding");
-			String tidspunkt = post.get("tid");
-			int avtaleid = Integer.parseInt(post.get("avtaleID"));
-			int varselid = Integer.parseInt(post.get("varselID"));
-			int sett = Integer.parseInt(post.get("sett"));
-			varsler.add(new Varsel(varselid,avtaleid, sett, tidspunkt, beskrivelse, brukernavn));
-		}
-		for(Varsel varsel: varsler){
-			System.out.println("ALARM!!!");
-			System.out.println(varsel);
-			varsel.alarmenErSett(varsel.getVarselID());			
-		}
-		
-		
-	}
-	
-	
-	public void visNyeVarsler(){ //Hvem ble du invitert av vises som eier, skj¿nner ikke hvorfor
+	public void visNyeVarsler(){ //Hvem ble du invitert av vises som eier, skjÂ¿nner ikke hvorfor
 		String statement = ("select starttid, sluttid, sted, beskrivelse,rom, eier AS \"invitert av\" " +
 		"from avtale, deltar " +
 		"where deltar.avtaleID=avtale.avtaleID and deltar.brukernavn=" + ("\"") + brukernavn + ("\"") + "and status =" + 0 );
 		ArrayList<HashMap<String,String>> avtaler = conn.get(statement);
 		int count = avtaler.size();
 		System.out.println("\n\nDu har " + count + " nye invitasjoner og ubesvarte avtaler!");
-		for(HashMap<String,String> avtale : avtaler){
-			System.out.println(avtale.toString());
-		}
+		toString1(statement);
+		
 	}
 	
 	
@@ -149,14 +249,14 @@ public class Person {
 	}
 	
 	
-	public void endreDeltakerstatus(){ //Endrer kun sin egen her, kun eiere kan endre andres. Gj¿res via endre/administrere avtale
+	public void endreDeltakerstatus(){ //Endrer kun sin egen her, kun eiere kan endre andres. GjÂ¿res via endre/administrere avtale
 		System.out.println("Status 0 = Ubesvart invitasjon\nStatus 1 = Skal delta\nStatus 2 = Skal IKKE delta\n");
 		String statement = ("select beskrivelse, deltar.avtaleID, status from avtale, deltar where sluttid>= cast((now()) as date) and deltar.avtaleID=avtale.avtaleID and deltar.brukernavn=" + ("\"") + brukernavn + ("\""));
 		ArrayList<HashMap<String,String>> avtaler = conn.get(statement);
 		for(HashMap<String,String> avtale : avtaler){
 			System.out.println(avtale.toString());
 		}
-		System.out.println("\nSkriv inn avtaleID for den avtalen du ¿nsker Œ endre deltakerstatus i: ");
+		System.out.println("\nSkriv inn avtaleID for den avtalen du Â¿nsker Å’ endre deltakerstatus i: ");
 		int avtaleID = in.nextInt();
 		in.nextLine();
 		System.out.println("Ny deltakerstatus: ");
@@ -166,7 +266,7 @@ public class Person {
 		if (nyStatus==2){
 			sendAvbudvarsel(avtaleID);
 			in.nextLine();
-			System.out.println("¿nsker du Œ skjule avtalen i kalenderen din? Trykk 1 for ja.");
+			System.out.println("Â¿nsker du Å’ skjule avtalen i kalenderen din? Trykk 1 for ja.");
 			int valg = in.nextInt();
 			if(valg==1){
 				String endreVisning = "update deltar set skjul_i_kalender=1 where avtaleID=" + ("\"") + avtaleID + ("\"")+  "and brukernavn =" + ("\"") + brukernavn + ("\"") ;
@@ -199,7 +299,7 @@ public class Person {
 	public void endreGruppe() {
 		visGrupper();
 		in.nextLine();
-		System.out.println("Skriv inn navn pŒ gruppe du ¿nsker Œ endre");
+		System.out.println("Skriv inn navn pÅ’ gruppe du Â¿nsker Å’ endre");
 		String gruppenavn = in.nextLine();
 		String hentGruppeID = ("Select gruppeID from gruppe where gruppenavn=" + ("\"") + gruppenavn + ("\""));
 		ArrayList<HashMap<String,String>> resultat = conn.get(hentGruppeID);
@@ -221,19 +321,19 @@ public class Person {
 		String endringerIAvtale = "Select beskrivelse from avtale, deltar where avtale.avtaleID = deltar.avtaleID and brukernavn= "+ ("\"") + brukernavn + ("\"") + "and usett_endring=1 and skjul_i_kalender=0";
 		ArrayList<HashMap<String,String>> endredeAvtaler = conn.get(endringerIAvtale);
 		for(HashMap<String,String> avtale : endredeAvtaler){
-			System.out.println( "\nVARSEL: Avtalen \"" + avtale.get("beskrivelse")+ ("\"")+ " har blitt endret, vis kalender for Œ se endringer");
+			System.out.println( "\nVARSEL: Avtalen \"" + avtale.get("beskrivelse")+ ("\"")+ " har blitt endret, vis kalender for Å’ se endringer");
 		}
 		String avlysninger = "Select beskrivelse, avtale.avtaleID from avtale, deltar where avtale.avtaleID = deltar.avtaleID and brukernavn= "+ ("\"") + brukernavn + ("\"") + "and usett_endring=2";
 		ArrayList<HashMap<String,String>> avlysningAvtaler = conn.get(avlysninger);
 		for(HashMap<String,String> avtale : avlysningAvtaler){
-			System.out.println( "\nVARSEL: Avlysninger i avtalen \"" + avtale.get("beskrivelse")+ ("\". F¿lgende deltakere har avlyst:\n "));
+			System.out.println( "\nVARSEL: Avlysninger i avtalen \"" + avtale.get("beskrivelse")+ ("\". FÂ¿lgende deltakere har avlyst:\n "));
 			int avtaleID = Integer.parseInt(avtale.get("avtaleID"));
 			String deltakerAvlyst = "select brukernavn from deltar where avtaleID="+("\"") + avtaleID + ("\"") + "and status=2";
 			ArrayList<HashMap<String,String>> deltakereAvlyst = conn.get(deltakerAvlyst);
 			for(HashMap<String,String> deltaker : deltakereAvlyst){
 				System.out.print("-"+deltaker.get("brukernavn")+"-");
 			}
-			System.out.println(". Vis kalender for Œ se flere endringer i avtalen");
+			System.out.println(". Vis kalender for Å’ se flere endringer i avtalen");
 		}
 		String markerSett = "Update deltar set usett_endring=0 where brukernavn= "+ ("\"") + brukernavn + ("\"") + "and (usett_endring=1 or usett_endring=2 or usett_endring=3)";
 		conn.send(markerSett);
@@ -254,7 +354,7 @@ public class Person {
 			String deltakernavn=deltaker.get("brukernavn");
 			int status = Integer.parseInt(deltaker.get("status"));
 			if (status==0){
-				System.out.println(deltakernavn + " har ikke svart pŒ innbydelsen.");
+				System.out.println(deltakernavn + " har ikke svart pÅ’ innbydelsen.");
 			}
 			if (status==1){
 				System.out.println(deltakernavn + " skal delta.");
