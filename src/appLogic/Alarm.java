@@ -3,6 +3,7 @@ package appLogic;
 import org.joda.time.DateTime;
 
 public class Alarm {
+	private String Hanna = "hannanananananaanan"
 	private final DateTime time;
 	private String label;
 	private final Appointment appointment;
